@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Video Downloader</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+</head>
+<body>
+  <div class="container">
+    <div class="icon-bar">
+      <i class="fab fa-youtube"></i>
+      <i class="fab fa-tiktok"></i>
+      <i class="fab fa-instagram"></i>
+    </div>
+    <h1>Download Your Video</h1>
+    <input type="text" id="url" placeholder="Paste video URL here..." />
+    <button id="formatToggle" data-format="mp4" type="button">
+      🎵 Format: MP4 <i class="fas fa-exchange-alt"></i>
+    </button>
+    <button onclick="startDownload()">Download</button>
+    <div class="progress-container" id="progress-container">
+      <div class="progress-bar">
+        <div class="progress" id="progress"></div>
+      </div>
+      <div id="progress-text">0%</div>
+    </div>
+    
+    <div id="message"></div>
+    <div id="filename" style="font-size: 0.9rem; color: #80d8ff; margin-top: 5px;"></div>
+    <a id="link" href="#" style="display: none;" target="_blank">🔗 Open downloaded file</a>
+    
+  </div>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+  <!-- Dark Mode Toggle -->
+  <div class="theme-toggle">
+    <label class="switch">
+      <button id="themeToggleBtn"></button>
+      <span class="slider"></span>
+    </label>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const toggleBtn = document.getElementById('themeToggleBtn');
+      const isDark = localStorage.getItem('theme') === 'dark';
+      document.body.classList.toggle('dark-mode', isDark);
+
+      toggleBtn.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        const newTheme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
+        localStorage.setItem('theme', newTheme);
+      });
+    });
+  </script>
+
+</body>
+</html>
