@@ -12,25 +12,31 @@ app = Flask(__name__)
 DEFAULT_SAVE_PATH = os.getenv("SAVE_PATH", "/tmp/Downloads")  # Use a temporary directory for production
 os.makedirs(DEFAULT_SAVE_PATH, exist_ok=True)
 
+# Get cookies file path from environment variable or use default
+COOKIES_PATH = os.getenv("YT_COOKIES_FILE", r"C:\Users\stlio\Download\cookies.txt")  # Default path for cookies
+
 def download_youtube_video(url, save_path, format_choice):
     try:
         os.makedirs(save_path, exist_ok=True)
+        ydl_opts = {
+            'format': 'bestvideo+bestaudio/best',
+            'outtmpl': os.path.join(save_path, '%(title)s.%(ext)s'),
+            'merge_output_format': 'mp4',
+        }
+
+        # If cookies path is provided, add it to yt-dlp options
+        if COOKIES_PATH:
+            ydl_opts['cookiefile'] = COOKIES_PATH
+
         if format_choice == "mp3":
-            ydl_opts = {
+            ydl_opts.update({
                 'format': 'bestaudio/best',
-                'outtmpl': os.path.join(save_path, '%(title)s.%(ext)s'),
                 'postprocessors': [{
                     'key': 'FFmpegExtractAudio',
                     'preferredcodec': 'mp3',
                     'preferredquality': '192',
                 }],
-            }
-        else:
-            ydl_opts = {
-                'outtmpl': os.path.join(save_path, '%(title)s.%(ext)s'),
-                'format': 'bestvideo+bestaudio/best',
-                'merge_output_format': 'mp4',
-            }
+            })
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
