@@ -6,3 +6,5 @@ MarkupSafe==3.0.2
 Flask==2.0.1
 Werkzeug==2.0.3
 yt-dlp==2023.3.4
+python-dotenv==0.21.0
+
