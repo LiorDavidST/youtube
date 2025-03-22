@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, send_from_directory
+from flask import Flask, render_template, request, jsonify, send_from_directory, abort, make_response
 import os
 import yt_dlp
 from dotenv import load_dotenv
@@ -62,28 +62,23 @@ def download_youtube_video(url, save_path, format_choice):
 
 
 # Block homepage access with message
-from flask import abort, make_response
-
-@app.route("/", methods=["GET", "POST"])
-def index():
+@app.route("/", methods=["GET"])
+def homepage_block():
     return make_response("<h1>Access Denied</h1><p>This site is blocked and intended for educational purposes only.</p>", 403)
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/submit", methods=["POST"])
 def index():
-    if request.method == "POST":
-        url = request.form.get("url", "").strip()
-        format_choice = request.form.get("format", "mp4").strip()
-        save_path = request.form.get("save_path", "").strip()
-        if not save_path:
-            save_path = DEFAULT_SAVE_PATH
+    url = request.form.get("url", "").strip()
+    format_choice = request.form.get("format", "mp4").strip()
+    save_path = request.form.get("save_path", "").strip()
+    if not save_path:
+        save_path = DEFAULT_SAVE_PATH
 
-        if not url:
-            return jsonify({"success": False, "message": "❌ Please enter a valid YouTube URL!"})
+    if not url:
+        return jsonify({"success": False, "message": "❌ Please enter a valid YouTube URL!"})
 
-        result = download_youtube_video(url, save_path, format_choice)
-        return jsonify(result)
-
-    return render_template("index.html")
+    result = download_youtube_video(url, save_path, format_choice)
+    return jsonify(result)
 
 @app.route("/download/<filename>")
 def serve_download(filename):
