@@ -16,48 +16,57 @@ os.makedirs(DEFAULT_SAVE_PATH, exist_ok=True)
 COOKIES_PATH = os.getenv("YT_COOKIES_FILE", r"C:\Users\stlio\Download\cookies.txt")  # Default path for cookies
 
 def download_youtube_video(url, save_path, format_choice):
+    """
+    Downloads a video from a supported platform using yt-dlp with dynamic cookie support.
+    """
     try:
+        # Determine appropriate cookie file based on URL
+        if "instagram.com" in url:
+            cookies = "instagram_cookies.txt"
+        elif "tiktok.com" in url:
+            cookies = "tiktok_cookies.txt"
+        else:
+            cookies = "youtube_cookies.txt"
+
         os.makedirs(save_path, exist_ok=True)
-        ydl_opts = {
-            'format': 'bestvideo+bestaudio/best',
-            'outtmpl': os.path.join(save_path, '%(title)s.%(ext)s'),
-            'merge_output_format': 'mp4',
-        }
 
-        # If cookies path is provided, add it to yt-dlp options
-        if COOKIES_PATH:
-            ydl_opts['cookiefile'] = COOKIES_PATH
-
+        # Set the appropriate format
         if format_choice == "mp3":
-            ydl_opts.update({
+            ydl_opts = {
                 'format': 'bestaudio/best',
+                'outtmpl': os.path.join(save_path, '%(title)s.%(ext)s'),
+                'cookiefile': cookies,
                 'postprocessors': [{
                     'key': 'FFmpegExtractAudio',
                     'preferredcodec': 'mp3',
                     'preferredquality': '192',
                 }],
-            })
+            }
+        else:
+            ydl_opts = {
+                'format': 'bestvideo+bestaudio/best',
+                'merge_output_format': 'mp4',
+                'outtmpl': os.path.join(save_path, '%(title)s.%(ext)s'),
+                'cookiefile': cookies,
+            }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=True)
-            filename = ydl.prepare_filename(info)
-            # Fix extension if post-processing changed it
-            if format_choice == "mp3":
-                filename = os.path.splitext(filename)[0] + ".mp3"
-            elif filename.endswith(".webm"):
-                filename = os.path.splitext(filename)[0] + ".mp4"
+            ydl.download([url])
 
-        file_only = os.path.basename(filename)
-        return {
-            "success": True,
-            "message": f"✅ Downloaded successfully: {file_only}",
-            "filename": file_only
-        }
+        return {"success": True, "message": f"Downloaded successfully: {url}"}
 
     except yt_dlp.utils.DownloadError as e:
         return {"success": False, "message": f"❌ Download Error: {e}"}
     except Exception as e:
-        return {"success": False, "message": f"❌ An unexpected error occurred: {e}"}
+        return {"success": False, "message": f"❌ Unexpected error: {e}"}
+
+
+# Block homepage access with message
+from flask import abort, make_response
+
+@app.route("/", methods=["GET", "POST"])
+def index():
+    return make_response("<h1>Access Denied</h1><p>This site is blocked and intended for educational purposes only.</p>", 403)
 
 @app.route("/", methods=["GET", "POST"])
 def index():
