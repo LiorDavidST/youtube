@@ -61,10 +61,9 @@ def download_youtube_video(url, save_path, format_choice):
         return {"success": False, "message": f"❌ Unexpected error: {e}"}
 
 
-# Block homepage access with message
 @app.route("/", methods=["GET"])
-def homepage_block():
-    return make_response("<h1>Access Denied</h1><p>This site is blocked and intended for educational purposes only.</p>", 403)
+def homepage():
+    return render_template("index.html")
 
 @app.route("/submit", methods=["POST"])
 def index():
