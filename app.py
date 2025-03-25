@@ -62,8 +62,9 @@ def download_youtube_video(url, save_path, format_choice):
 
 
 @app.route("/", methods=["GET"])
-def homepage():
-    return render_template("index.html")
+def homepage_block():
+    return make_response("<h1>Access Denied</h1><p>This site is blocked and intended for educational purposes only.</p>", 403)
+
 
 @app.route("/submit", methods=["POST"])
 def index():
